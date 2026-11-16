@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmergenciasModule } from '../emergencias/emergencias.module';
@@ -13,7 +14,7 @@ import { EstadisticasModule } from '../estadisticas/estadisticas.module';
 import { EventosGlobalesModule } from '../eventos-globales/eventos-globales.module';
 
 @Module({
-  imports: [EmergenciasModule, AuthModule, UsuariosModule, RecursosModule, RefugiosModule, VoluntariosModule, SolicitudesModule, ContactoModule, EstadisticasModule, EventosGlobalesModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), EmergenciasModule, AuthModule, UsuariosModule, RecursosModule, RefugiosModule, VoluntariosModule, SolicitudesModule, ContactoModule, EstadisticasModule, EventosGlobalesModule],
   controllers: [AppController],
   providers: [AppService],
 })
