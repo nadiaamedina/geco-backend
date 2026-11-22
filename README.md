@@ -87,3 +87,27 @@ Ramas creadas desde `dev`, con prefijo según el tipo de cambio:
 - `docs/` — documentación
 
 Todo entra por Pull Request con revisión del equipo. `main` solo recibe merges desde `dev`.
+
+
+## Endpoints y Postman
+
+Todas las rutas de la API están documentadas y se pueden probar usando Postman. 
+La colección exportada se encuentra en la carpeta `postman/` del repositorio (`GECO Backend.postman_collection.json`).
+
+| Módulo | Ruta Base | Métodos |
+| :--- | :--- | :--- |
+| Auth | `/auth` | GET, POST, PATCH, DELETE |
+| Usuarios | `/usuarios` | GET, POST, PATCH, DELETE |
+| Emergencias | `/emergencias` | GET, POST, PATCH, DELETE |
+| Recursos | `/recursos` | GET, POST, PATCH, DELETE |
+| Refugios | `/refugios` | GET, POST, PATCH, DELETE |
+| Voluntarios | `/voluntarios` | GET, POST, PATCH, DELETE |
+| Solicitudes | `/solicitudes` | GET, POST, PATCH, DELETE |
+| Contacto | `/contacto` | GET, POST, PATCH, DELETE |
+| Estadísticas | `/estadisticas` | GET, POST, PATCH, DELETE |
+| Eventos Globales | `/eventos-globales` | GET, POST, PATCH, DELETE |
+
+Para probar los endpoints:
+1. Abrir Postman e importar el archivo `.json` de la carpeta `postman/`.
+2. Configurar la variable `base_url` con el valor `http://localhost:4000`.
+3. Ejecutar las peticiones con el servidor levantado (`npm run start:dev`).
