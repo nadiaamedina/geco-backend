@@ -9,15 +9,15 @@ export class SolicitudesService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createSolicitudeDto: CreateSolicitudeDto) {
-    return this.prisma.solicitudes.create({ data: createSolicitudeDto });
+    return this.prisma.solicitud.create({ data: createSolicitudeDto });
   }
 
   findAll() {
-    return this.prisma.solicitudes.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.solicitud.findMany({ orderBy: { id: 'asc' } });
   }
 
   async findOne(id: number) {
-    const solicitud = await this.prisma.solicitudes.findUnique({
+    const solicitud = await this.prisma.solicitud.findUnique({
       where: { id },
     });
 
@@ -31,7 +31,7 @@ export class SolicitudesService {
   async update(id: number, updateSolicitudeDto: UpdateSolicitudeDto) {
     await this.findOne(id);
 
-    return this.prisma.solicitudes.update({
+    return this.prisma.solicitud.update({
       where: { id },
       data: updateSolicitudeDto,
     });
@@ -40,6 +40,6 @@ export class SolicitudesService {
   async remove(id: number) {
     await this.findOne(id);
 
-    return this.prisma.solicitudes.delete({ where: { id } });
+    return this.prisma.solicitud.delete({ where: { id } });
   }
 }

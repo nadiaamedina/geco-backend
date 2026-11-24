@@ -10,15 +10,15 @@ export class EmergenciasService {
 
   create(createEmergenciaDto: CreateEmergenciaDto) {
     /* La fecha no se manda: la base la completa con CURRENT_DATE */
-    return this.prisma.emergencias.create({ data: createEmergenciaDto });
+    return this.prisma.emergencia.create({ data: createEmergenciaDto });
   }
 
   findAll() {
-    return this.prisma.emergencias.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.emergencia.findMany({ orderBy: { id: 'asc' } });
   }
 
   async findOne(id: number) {
-    const emergencia = await this.prisma.emergencias.findUnique({
+    const emergencia = await this.prisma.emergencia.findUnique({
       where: { id },
     });
 
@@ -32,7 +32,7 @@ export class EmergenciasService {
   async update(id: number, updateEmergenciaDto: UpdateEmergenciaDto) {
     await this.findOne(id);
 
-    return this.prisma.emergencias.update({
+    return this.prisma.emergencia.update({
       where: { id },
       data: updateEmergenciaDto,
     });
@@ -41,6 +41,6 @@ export class EmergenciasService {
   async remove(id: number) {
     await this.findOne(id);
 
-    return this.prisma.emergencias.delete({ where: { id } });
+    return this.prisma.emergencia.delete({ where: { id } });
   }
 }
