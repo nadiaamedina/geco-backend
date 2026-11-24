@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
+/* SERVICIO DE CONTACTO — consulta la base a traves de Prisma Client */
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactoDto } from './dto/create-contacto.dto';
 import { UpdateContactoDto } from './dto/update-contacto.dto';
 
 @Injectable()
 export class ContactoService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createContactoDto: CreateContactoDto) {
-    return 'This action adds a new contacto';
+    /* La fecha no se manda: la base la completa con CURRENT_DATE */
+    return this.prisma.mensajes_contacto.create({ data: createContactoDto });
   }
 
   findAll() {
-    return `This action returns all contacto`;
+    return this.prisma.mensajes_contacto.findMany({ orderBy: { id: 'desc' } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contacto`;
+  async findOne(id: number) {
+    const mensaje = await this.prisma.mensajes_contacto.findUnique({
+      where: { id },
+    });
+
+    if (!mensaje) {
+      throw new NotFoundException(`No existe un mensaje con id ${id}.`);
+    }
+
+    return mensaje;
   }
 
-  update(id: number, updateContactoDto: UpdateContactoDto) {
-    return `This action updates a #${id} contacto`;
+  async update(id: number, updateContactoDto: UpdateContactoDto) {
+    await this.findOne(id);
+
+    return this.prisma.mensajes_contacto.update({
+      where: { id },
+      data: updateContactoDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contacto`;
+  async remove(id: number) {
+    await this.findOne(id);
+
+    return this.prisma.mensajes_contacto.delete({ where: { id } });
   }
 }
