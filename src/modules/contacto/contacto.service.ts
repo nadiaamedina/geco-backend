@@ -10,15 +10,15 @@ export class ContactoService {
 
   create(createContactoDto: CreateContactoDto) {
     /* La fecha no se manda: la base la completa con CURRENT_DATE */
-    return this.prisma.mensajeContacto.create({ data: createContactoDto });
+    return this.prisma.mensajes_contacto.create({ data: createContactoDto });
   }
 
   findAll() {
-    return this.prisma.mensajeContacto.findMany({ orderBy: { id: 'desc' } });
+    return this.prisma.mensajes_contacto.findMany({ orderBy: { id: 'desc' } });
   }
 
   async findOne(id: number) {
-    const mensaje = await this.prisma.mensajeContacto.findUnique({
+    const mensaje = await this.prisma.mensajes_contacto.findUnique({
       where: { id },
     });
 
@@ -32,7 +32,7 @@ export class ContactoService {
   async update(id: number, updateContactoDto: UpdateContactoDto) {
     await this.findOne(id);
 
-    return this.prisma.mensajeContacto.update({
+    return this.prisma.mensajes_contacto.update({
       where: { id },
       data: updateContactoDto,
     });
@@ -41,6 +41,6 @@ export class ContactoService {
   async remove(id: number) {
     await this.findOne(id);
 
-    return this.prisma.mensajeContacto.delete({ where: { id } });
+    return this.prisma.mensajes_contacto.delete({ where: { id } });
   }
 }
