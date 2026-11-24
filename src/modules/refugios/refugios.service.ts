@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateRefugioDto } from './dto/create-refugio.dto';
 import { UpdateRefugioDto } from './dto/update-refugio.dto';
 
 @Injectable()
 export class RefugiosService {
-  create(createRefugioDto: CreateRefugioDto) {
-    return 'This action adds a new refugio';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    const refugios = await this.prisma.refugio.findMany();
+
+    /* Los lugares disponibles se calculan, no se guardan:
+       así nunca quedan desactualizados */
+    return refugios.map((r) => ({
+      ...r,
+      disponibles: r.capacidad - r.alojados,
+    }));
   }
 
-  findAll() {
-    return `This action returns all refugios`;
+  async findOne(id: number) {
+    const refugio = await this.prisma.refugio.findUnique({ where: { id } });
+
+    if (!refugio) {
+      throw new NotFoundException(`No existe el refugio ${id}`);
+    }
+    return { ...refugio, disponibles: refugio.capacidad - refugio.alojados };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} refugio`;
+  create(datos: CreateRefugioDto) {
+    return this.prisma.refugio.create({ data: datos });
   }
 
-  update(id: number, updateRefugioDto: UpdateRefugioDto) {
-    return `This action updates a #${id} refugio`;
+  async update(id: number, datos: UpdateRefugioDto) {
+    await this.findOne(id);
+    return this.prisma.refugio.update({ where: { id }, data: datos });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} refugio`;
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.refugio.delete({ where: { id } });
   }
 }
