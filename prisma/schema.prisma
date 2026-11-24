@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Asignacion {
+  id              Int        @id @default(autoincrement())
+  voluntarioId    Int        @map("voluntario_id")
+  emergenciaId    Int        @map("emergencia_id")
+  tarea           String     @db.VarChar(160)
+  fechaAsignacion DateTime   @default(dbgenerated("CURRENT_DATE")) @map("fecha_asignacion") @db.Date
+  emergencia      Emergencia @relation(fields: [emergenciaId], references: [id], onDelete: Cascade, map: "fk_asignaciones_emergencia")
+  voluntario      Voluntario @relation(fields: [voluntarioId], references: [id], onDelete: Cascade, map: "fk_asignaciones_voluntario")
+
+  @@unique([voluntarioId, emergenciaId], map: "uq_asignaciones_voluntario_emergencia")
+  @@map("asignaciones")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Emergencia {
+  id           Int          @id @default(autoincrement())
+  titulo       String       @db.VarChar(160)
+  descripcion  String?
+  gravedad     String       @db.VarChar(10)
+  estado       String       @default("activa") @db.VarChar(20)
+  fecha        DateTime     @default(dbgenerated("CURRENT_DATE")) @db.Date
+  zona         String       @db.VarChar(120)
+  afectados    Int          @default(0)
+  usuarioId    Int          @map("usuario_id")
+  asignaciones Asignacion[]
+  usuario      Usuario      @relation(fields: [usuarioId], references: [id], map: "fk_emergencias_usuario")
+  solicitudes  Solicitud[]
+
+  @@index([estado], map: "ix_emergencias_estado")
+  @@index([gravedad], map: "ix_emergencias_gravedad")
+  @@map("emergencias")
+}
+
+model MensajeContacto {
+  id      Int      @id @default(autoincrement())
+  nombre  String   @db.VarChar(120)
+  email   String   @db.VarChar(120)
+  asunto  String   @db.VarChar(160)
+  mensaje String
+  fecha   DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+
+  @@map("mensajes_contacto")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Recurso {
+  id                  Int     @id @default(autoincrement())
+  nombre              String  @db.VarChar(120)
+  cantidadDisponible  Decimal @default(0) @map("cantidad_disponible") @db.Decimal(10, 2)
+  cantidadDistribuida Decimal @default(0) @map("cantidad_distribuida") @db.Decimal(10, 2)
+  unidad              String  @db.VarChar(20)
+  estado              String  @default("suficiente") @db.VarChar(20)
+
+  @@map("recursos")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Refugio {
+  id        Int    @id @default(autoincrement())
+  nombre    String @db.VarChar(120)
+  direccion String @db.VarChar(200)
+  capacidad Int
+  alojados  Int    @default(0)
+  estado    String @default("activo") @db.VarChar(20)
+
+  @@map("refugios")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Solicitud {
+  id               Int        @id @default(autoincrement())
+  titulo           String     @db.VarChar(160)
+  descripcion      String?
+  prioridad        String     @db.VarChar(10)
+  estado           String     @default("pendiente") @db.VarChar(20)
+  telefonoContacto String     @map("telefono_contacto") @db.VarChar(30)
+  fecha            DateTime   @default(dbgenerated("CURRENT_DATE")) @db.Date
+  emergenciaId     Int        @map("emergencia_id")
+  emergencia       Emergencia @relation(fields: [emergenciaId], references: [id], map: "fk_solicitudes_emergencia")
+
+  @@index([estado], map: "ix_solicitudes_estado")
+  @@index([prioridad], map: "ix_solicitudes_prioridad")
+  @@map("solicitudes")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Usuario {
+  id          Int          @id @default(autoincrement())
+  nombre      String       @db.VarChar(60)
+  apellido    String       @db.VarChar(60)
+  email       String       @unique(map: "uq_usuarios_email") @db.VarChar(120)
+  contrasena  String       @db.VarChar(255)
+  rol         String       @db.VarChar(20)
+  creadoEn    DateTime     @default(now()) @map("creado_en") @db.Timestamp(6)
+  emergencias Emergencia[]
+
+  @@map("usuarios")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Voluntario {
+  id             Int          @id @default(autoincrement())
+  nombre         String       @db.VarChar(120)
+  telefono       String       @db.VarChar(30)
+  habilidad      String       @db.VarChar(120)
+  disponibilidad String       @db.VarChar(40)
+  estado         String       @default("disponible") @db.VarChar(20)
+  asignaciones   Asignacion[]
+
+  @@map("voluntarios")
+}

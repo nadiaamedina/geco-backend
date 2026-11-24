@@ -1,0 +1,1119 @@
+{
+  "info": {
+    "_postman_id": "f5471d2b-c542-4a54-ac5c-b08eece95113",
+    "name": "GECO Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "60237362",
+    "_collection_link": "https://go.postman.co/collection/60237362-f5471d2b-c542-4a54-ac5c-b08eece95113?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Emergencias",
+      "item": [
+        {
+          "name": "Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Traer una",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear emergencia",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"titulo\": \"Derrumbes en la ruta 9\",\r\n  \"descripcion\": \"Se necesitan ambulancias\",\r\n  \"gravedad\": \"alta\",\r\n  \"zona\": \"Ruta 9 km 20\",\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar emergencia",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"gravedad\": \"baja\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer usuario por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Eventos-globales",
+      "item": [
+        {
+          "name": "listar eventos globales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/eventos-globales",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "eventos-globales"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar evento global",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/eventos-globales/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "eventos-globales",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer evento global por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/eventos-globales",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "eventos-globales"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear evento globar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/eventos-globales",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "eventos-globales"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar evento global",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/eventos-globales/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "eventos-globales",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Estadisticas",
+      "item": [
+        {
+          "name": "listar estadisticas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/estadisticas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "estadisticas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar estadistica",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/estadisticas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "estadisticas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer estadistica por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/estadisticas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "estadisticas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear estadistica",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/estadisticas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "estadisticas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar estadisitica",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/estadisticas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "estadisticas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contacto",
+      "item": [
+        {
+          "name": "listar mensajes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar contacto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer mensaje por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear contacto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/contacto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar contacto",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/contacto/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recursos",
+      "item": [
+        {
+          "name": "listar recursos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar recursos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer recurso por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear recurso",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar recurso",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Solicitudes",
+      "item": [
+        {
+          "name": "listar solicitudes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar solicitudes",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer solicitudes por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear solicitud",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar solicitud",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Voluntarios",
+      "item": [
+        {
+          "name": "listar voluntarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar voluntario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer voluntario por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear voluntario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar voluntario",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Refugios",
+      "item": [
+        {
+          "name": "listar refugios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar refugio",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "traer refugio por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear refugio",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar refugio",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "listar auth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/Auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "Auth"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cerrar sesion",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/Auth/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "Auth",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "obtener sesion",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/Auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "Auth"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "actualizar auth",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    }
+  ]
+}
