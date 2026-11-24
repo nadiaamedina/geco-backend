@@ -9,7 +9,7 @@ export class SolicitudesService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createSolicitudeDto: CreateSolicitudeDto) {
-    return this.prisma.solicitudes.create({ data: createSolicitudeDto as any});
+    return this.prisma.solicitudes.create({ data: createSolicitudeDto });
   }
 
   findAll() {

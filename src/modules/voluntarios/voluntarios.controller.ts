@@ -7,11 +7,11 @@ import { UpdateVoluntarioDto } from './dto/update-voluntario.dto';
 export class VoluntariosController {
   constructor(private readonly voluntariosService: VoluntariosService) {}
 
-  @Post()
+    @Post()
   create(@Body() createVoluntarioDto: CreateVoluntarioDto) {
     return this.voluntariosService.create(createVoluntarioDto);
   }
-
+  
   @Get()
   findAll() {
     return this.voluntariosService.findAll();
