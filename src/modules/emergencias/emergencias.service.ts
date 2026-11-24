@@ -10,7 +10,7 @@ export class EmergenciasService {
 
   create(createEmergenciaDto: CreateEmergenciaDto) {
     /* La fecha no se manda: la base la completa con CURRENT_DATE */
-    return this.prisma.emergencias.create({ data: createEmergenciaDto });
+    return this.prisma.emergencias.create({ data: createEmergenciaDto as any});
   }
 
   findAll() {
