@@ -9,23 +9,15 @@ export class SolicitudesService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createSolicitudeDto: CreateSolicitudeDto) {
-    const { telefonoContacto, emergenciaId, ...resto } = createSolicitudeDto;
-
-    return this.prisma.solicitudes.create({
-      data: {
-        ...resto,
-        telefono_contacto: telefonoContacto,
-        emergencia_id: emergenciaId,
-      },
-    });
+    return this.prisma.solicitud.create({ data: createSolicitudeDto });
   }
 
   findAll() {
-    return this.prisma.solicitudes.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.solicitud.findMany({ orderBy: { id: 'asc' } });
   }
 
   async findOne(id: number) {
-    const solicitud = await this.prisma.solicitudes.findUnique({
+    const solicitud = await this.prisma.solicitud.findUnique({
       where: { id },
     });
 
@@ -39,23 +31,15 @@ export class SolicitudesService {
   async update(id: number, updateSolicitudeDto: UpdateSolicitudeDto) {
     await this.findOne(id);
 
-    const { telefonoContacto, emergenciaId, ...resto } = updateSolicitudeDto;
-
-    return this.prisma.solicitudes.update({
+    return this.prisma.solicitud.update({
       where: { id },
-      data: {
-        ...resto,
-        ...(telefonoContacto !== undefined && {
-          telefono_contacto: telefonoContacto,
-        }),
-        ...(emergenciaId !== undefined && { emergencia_id: emergenciaId }),
-      },
+      data: updateSolicitudeDto,
     });
   }
 
   async remove(id: number) {
     await this.findOne(id);
 
-    return this.prisma.solicitudes.delete({ where: { id } });
+    return this.prisma.solicitud.delete({ where: { id } });
   }
 }
