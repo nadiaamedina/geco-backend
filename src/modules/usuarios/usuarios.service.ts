@@ -1,26 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsuariosService {
-  create(createUsuarioDto: CreateUsuarioDto) {
-    return 'This action adds a new usuario';
-  }
+  constructor(private readonly prisma: PrismaService) {}
+
+  /* select explícito: la contraseña nunca sale de la base hacia la API */
+  private readonly campos = {
+    id: true,
+    nombre: true,
+    apellido: true,
+    email: true,
+    rol: true,
+    creadoEn: true,
+  };
 
   findAll() {
-    return `This action returns all usuarios`;
+    return this.prisma.usuario.findMany({ select: this.campos });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
-  }
+  async findOne(id: number) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id },
+      select: this.campos,
+    });
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    return `This action updates a #${id} usuario`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} usuario`;
+    if (!usuario) {
+      throw new NotFoundException(`No existe el usuario ${id}`);
+    }
+    return usuario;
   }
 }

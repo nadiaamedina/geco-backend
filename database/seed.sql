@@ -25,18 +25,16 @@ TRUNCATE TABLE asignaciones, solicitudes, emergencias, voluntarios,
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
---  usuarios (6)
 --  Las contraseñas van cifradas con bcrypt (RNF-02). Las de este archivo son
---  hashes de ejemplo; en producción las genera el backend al registrar.
+--  hashes reales de la contraseña 'geco1234', para poder probar el login.
 -- ----------------------------------------------------------------------------
 INSERT INTO usuarios (nombre, apellido, email, contrasena, rol) VALUES
-('Nadia',     'Medina',    'nadia.medina@geco.org',    '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'administrador'),
-('Constanza', 'Luna',      'constanza.luna@geco.org',  '$2b$10$Dkj3nFfQ1oTJ7hKpZ8vUeuYw2bLmXcVnRtGhJkLpQwErTyUiOpAsD', 'coordinador'),
-('Giacomo',   'Marangon',  'giacomo.marangon@geco.org','$2b$10$Pl0kMnBvCxZaSdFgHjKlOuYtReWqAzXsCdVfBgNhMjKlPoIuYtRe2', 'coordinador'),
-('Mariana',   'Quiroga',   'mariana.quiroga@geco.org', '$2b$10$QwErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOpAsDfGhJkLzXcVbNm1', 'operador'),
-('Facundo',   'Ibarra',    'facundo.ibarra@geco.org',  '$2b$10$ZxCvBnMaSdFgHjKlQwErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOp3', 'operador'),
-('Silvia',    'Juárez',    'silvia.juarez@geco.org',   '$2b$10$MnBvCxZlKjHgFdSaPoIuYtReWqAzXsCdVfBgNhMjKlPoIuYtReWq4', 'operador');
-
+('Nadia',     'Medina',    'nadia.medina@geco.org',    '$2b$12$H5pR7RUGRV419YL3w.tR/OhgkViJ6fbBbc0vJ5SmYSzad7YZTZtVq', 'administrador'),
+('Constanza', 'Luna',      'constanza.luna@geco.org',  '$2b$12$ug5Mbt2UWsLvTIoF/CdYA.UN4BcYTmCWlCoyhK9sBbQOnVtFRbsyC', 'coordinador'),
+('Giacomo',   'Marangon',  'giacomo.marangon@geco.org','$2b$12$QAlRaK.EdO0frq.zaR8Lmu2IO0.s4gyiuEXa6Xhpx6vnrWCzrLtoK', 'coordinador'),
+('Mariana',   'Quiroga',   'mariana.quiroga@geco.org', '$2b$12$OodFZ/2atDHzbYR3HFnyjOy1J5oWZWTn45Fse737/.16I5Z9poaYm', 'operador'),
+('Facundo',   'Ibarra',    'facundo.ibarra@geco.org',  '$2b$12$HgWdHsiBJO5diHoH695f7uDWyUay4Pb6mltX2J2MKf357X7wxwcY.', 'operador'),
+('Silvia',    'Juárez',    'silvia.juarez@geco.org',   '$2b$12$kyYyTB2waa8zeer1XDn25eJFhZgJaaUd6ZcjmQIYzgEY9Fk9tuWru', 'operador');
 
 -- ----------------------------------------------------------------------------
 --  refugios (5)
