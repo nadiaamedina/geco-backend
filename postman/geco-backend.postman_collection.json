@@ -1,0 +1,2618 @@
+{
+  "info": {
+    "name": "GECO Backend",
+    "description": "Coleccion de pruebas de la API de GECO (Gestion de Emergencias Comunitarias).\n\n**Como usarla**\n\n1. Levantar el backend con `npm run start`.\n2. Cargar los datos de prueba con `psql -U postgres -d geco_db -f database/seed.sql`.\n3. La direccion del servidor esta en la variable `base_url`. Si cambia el puerto, se corrige ahi y vale para todas las peticiones.\n\n**Como esta organizada**\n\nUna carpeta por modulo. Dentro de cada una, el mismo orden: listar, traer por id, traer uno inexistente (404), crear valido (201), crear invalido (400), modificar y eliminar.\n\nCada peticion lleva en la pestaña Tests la comprobacion del codigo de respuesta esperado, asi se puede ejecutar la carpeta completa y ver de un vistazo si todo responde bien.\n\nLas peticiones de crear guardan el id devuelto en una variable, y las de modificar y eliminar lo reutilizan. De esa forma la coleccion se puede ejecutar entera sin alterar los datos del seed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 · Auth",
+      "description": "Registro e inicio de sesion (TP12). El registro valido usa un correo distinto en cada ejecucion para poder repetirse; el de correo repetido usa uno del seed, que siempre existe.\n\nEl inicio de sesion valido guarda el token en la variable {{token}}.",
+      "item": [
+        {
+          "name": "Registrar usuario nuevo (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Postman\",\n  \"email\": \"prueba.{{$timestamp}}@geco.org\",\n  \"contrasena\": \"geco1234\",\n  \"rol\": \"operador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "El correo lleva {{$timestamp}}, que Postman reemplaza por la hora actual, asi cada ejecucion registra un usuario distinto y nunca choca con uno existente."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* La respuesta no debe incluir la contrasena */",
+                  "pm.test(\"No devuelve la contrasena\", function () {",
+                  "  pm.expect(pm.response.json()).to.not.have.property(\"contrasena\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con email ya existente (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nadia\",\n  \"apellido\": \"Medina\",\n  \"email\": \"nadia.medina@geco.org\",\n  \"contrasena\": \"geco1234\",\n  \"rol\": \"administrador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "El email es unico en la tabla. Prisma lanza el error P2002 y el service lo traduce a 409."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar sin apellido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prueba\",\n  \"email\": \"sin.apellido@geco.org\",\n  \"contrasena\": \"geco1234\",\n  \"rol\": \"operador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Falta un campo obligatorio: lo rechaza el DTO antes de llegar al service."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con rol invalido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Rol\",\n  \"email\": \"rol.invalido@geco.org\",\n  \"contrasena\": \"geco1234\",\n  \"rol\": \"jefe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Los unicos roles validos son coordinador, operador y administrador."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar con contrasena corta (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Prueba\",\n  \"apellido\": \"Corta\",\n  \"email\": \"clave.corta@geco.org\",\n  \"contrasena\": \"123\",\n  \"rol\": \"operador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "El DTO de registro exige al menos 8 caracteres."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesion (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nadia.medina@geco.org\",\n  \"contrasena\": \"geco1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Usuario del seed. La contrasena de prueba de los seis usuarios cargados es geco1234."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "/* Guarda el token para poder reutilizarlo */",
+                  "pm.collectionVariables.set(\"token\", pm.response.json().access_token);",
+                  "",
+                  "pm.test(\"Devuelve un access_token\", function () {",
+                  "  pm.expect(pm.response.json()).to.have.property(\"access_token\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesion con contrasena incorrecta (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nadia.medina@geco.org\",\n  \"contrasena\": \"incorrecta123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Devuelve el mismo mensaje que un correo inexistente, para no revelar que correos estan registrados."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesion con email inexistente (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"no.existe@geco.org\",\n  \"contrasena\": \"geco1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Mismo codigo y mismo mensaje que la anterior, a proposito."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 · Usuarios",
+      "description": "Modulo de solo lectura. La creacion de usuarios se hace por POST /auth/register, que es la unica ruta que hashea la contrasena.\n\nEl listado nunca devuelve el campo contrasena.",
+      "item": [
+        {
+          "name": "Listar usuarios (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "/* Ningun usuario debe traer la contrasena */",
+                  "pm.test(\"No devuelve contrasenas\", function () {",
+                  "  pm.response.json().forEach(function (u) {",
+                  "    pm.expect(u).to.not.have.property(\"contrasena\");",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer usuario por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer usuario inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 · Emergencias",
+      "description": "CRUD completo. Crear guarda el id en {{emergenciaId}}, y modificar y eliminar operan sobre ese registro, para no tocar los datos del seed.",
+      "item": [
+        {
+          "name": "Listar emergencias (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer emergencia por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer emergencia inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear emergencia (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Tormenta severa - Zona Sur\",\n  \"descripcion\": \"Caida de arboles y cortes de energia en varias manzanas.\",\n  \"gravedad\": \"media\",\n  \"zona\": \"Zona Sur\",\n  \"afectados\": 60,\n  \"usuarioId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            },
+            "description": "Guarda el id de la respuesta en la variable {{emergenciaId}}, que usan las dos ultimas peticiones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* Guarda el id de lo que se acaba de crear, para que las",
+                  "   peticiones de modificar y eliminar lo usen. */",
+                  "pm.collectionVariables.set(\"emergenciaId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear emergencia sin titulo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gravedad\": \"media\",\n  \"zona\": \"Zona Sur\",\n  \"usuarioId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            },
+            "description": "El titulo es obligatorio."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear emergencia con gravedad invalida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Prueba\",\n  \"gravedad\": \"altisima\",\n  \"zona\": \"Zona Sur\",\n  \"usuarioId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            },
+            "description": "Los unicos valores validos son alta, media y baja."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear emergencia con afectados en texto (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Prueba\",\n  \"gravedad\": \"media\",\n  \"zona\": \"Zona Sur\",\n  \"afectados\": \"muchos\",\n  \"usuarioId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias"
+              ]
+            },
+            "description": "Se espera un numero entero y llega texto."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar emergencia (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"resuelta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/emergencias/{{emergenciaId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "{{emergenciaId}}"
+              ]
+            },
+            "description": "Modifica el registro creado mas arriba, no uno del seed."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar emergencia (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/emergencias/{{emergenciaId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "emergencias",
+                "{{emergenciaId}}"
+              ]
+            },
+            "description": "Elimina el registro creado mas arriba, para que la base quede como estaba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 · Solicitudes",
+      "description": "CRUD completo. Toda solicitud pertenece a una emergencia: emergenciaId es obligatorio.",
+      "item": [
+        {
+          "name": "Listar solicitudes (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer solicitud por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer solicitud inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear solicitud (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Necesitamos agua potable\",\n  \"descripcion\": \"Familias sin suministro desde ayer.\",\n  \"prioridad\": \"alta\",\n  \"telefonoContacto\": \"381-2345678\",\n  \"emergenciaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "description": "Guarda el id de la respuesta en la variable {{solicitudId}}, que usan las dos ultimas peticiones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* Guarda el id de lo que se acaba de crear, para que las",
+                  "   peticiones de modificar y eliminar lo usen. */",
+                  "pm.collectionVariables.set(\"solicitudId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear solicitud sin titulo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prioridad\": \"alta\",\n  \"telefonoContacto\": \"381-2345678\",\n  \"emergenciaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "description": "El titulo es obligatorio."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear solicitud con prioridad invalida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Prueba\",\n  \"prioridad\": \"urgentisima\",\n  \"telefonoContacto\": \"381-2345678\",\n  \"emergenciaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "description": "Los unicos valores validos son alta, media y baja."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear solicitud sin emergenciaId (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Prueba\",\n  \"prioridad\": \"alta\",\n  \"telefonoContacto\": \"381-2345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes"
+              ]
+            },
+            "description": "Es obligatorio y a proposito no tiene valor por omision."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar solicitud (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"atendida\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes/{{solicitudId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}"
+              ]
+            },
+            "description": "Modifica el registro creado mas arriba, no uno del seed."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar solicitud (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/solicitudes/{{solicitudId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "solicitudes",
+                "{{solicitudId}}"
+              ]
+            },
+            "description": "Elimina el registro creado mas arriba, para que la base quede como estaba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 · Refugios",
+      "description": "CRUD completo. La base exige capacidad mayor a cero y que los alojados no superen la capacidad.",
+      "item": [
+        {
+          "name": "Listar refugios (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer refugio por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer refugio inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear refugio (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Club Social Centro\",\n  \"direccion\": \"Av. Sarmiento 450, Centro\",\n  \"capacidad\": 80,\n  \"alojados\": 12\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            },
+            "description": "Guarda el id de la respuesta en la variable {{refugioId}}, que usan las dos ultimas peticiones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* Guarda el id de lo que se acaba de crear, para que las",
+                  "   peticiones de modificar y eliminar lo usen. */",
+                  "pm.collectionVariables.set(\"refugioId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear refugio sin direccion (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Club Social Centro\",\n  \"capacidad\": 80\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            },
+            "description": "La direccion es obligatoria."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear refugio con capacidad cero (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Club Social Centro\",\n  \"direccion\": \"Av. Sarmiento 450\",\n  \"capacidad\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            },
+            "description": "La capacidad debe ser al menos 1."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear refugio con estado invalido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Club Social Centro\",\n  \"direccion\": \"Av. Sarmiento 450\",\n  \"capacidad\": 80,\n  \"estado\": \"lleno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios"
+              ]
+            },
+            "description": "Los unicos valores validos son activo, casi lleno y completo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar refugio (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alojados\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/refugios/{{refugioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios",
+                "{{refugioId}}"
+              ]
+            },
+            "description": "Modifica el registro creado mas arriba, no uno del seed."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar refugio (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/refugios/{{refugioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refugios",
+                "{{refugioId}}"
+              ]
+            },
+            "description": "Elimina el registro creado mas arriba, para que la base quede como estaba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 · Recursos",
+      "description": "CRUD completo. Las cantidades son decimales, no enteros, y la base exige que lo distribuido no supere lo disponible.",
+      "item": [
+        {
+          "name": "Listar recursos (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer recurso por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer recurso inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear recurso (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Agua envasada\",\n  \"unidad\": \"litros\",\n  \"cantidadDisponible\": 500.5,\n  \"cantidadDistribuida\": 120.25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            },
+            "description": "Guarda el id de la respuesta en la variable {{recursoId}}, que usan las dos ultimas peticiones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* Guarda el id de lo que se acaba de crear, para que las",
+                  "   peticiones de modificar y eliminar lo usen. */",
+                  "pm.collectionVariables.set(\"recursoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear recurso sin unidad (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Agua envasada\",\n  \"cantidadDisponible\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            },
+            "description": "La unidad es obligatoria."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear recurso con unidad invalida (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Agua envasada\",\n  \"unidad\": \"bidones\",\n  \"cantidadDisponible\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            },
+            "description": "Los unicos valores validos son kg, litros, unidades y kits."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear recurso con cantidad negativa (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Agua envasada\",\n  \"unidad\": \"litros\",\n  \"cantidadDisponible\": -10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos"
+              ]
+            },
+            "description": "Las cantidades no pueden ser negativas."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar recurso (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"bajo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/recursos/{{recursoId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos",
+                "{{recursoId}}"
+              ]
+            },
+            "description": "Modifica el registro creado mas arriba, no uno del seed."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar recurso (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recursos/{{recursoId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recursos",
+                "{{recursoId}}"
+              ]
+            },
+            "description": "Elimina el registro creado mas arriba, para que la base quede como estaba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 · Voluntarios",
+      "description": "CRUD completo. El estado es opcional: la base lo completa con 'disponible'.",
+      "item": [
+        {
+          "name": "Listar voluntarios (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer voluntario por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer voluntario inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear voluntario (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Martina Rios\",\n  \"telefono\": \"381-5566778\",\n  \"habilidad\": \"Enfermeria / Primeros auxilios\",\n  \"disponibilidad\": \"Turno tarde\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            },
+            "description": "Guarda el id de la respuesta en la variable {{voluntarioId}}, que usan las dos ultimas peticiones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* Guarda el id de lo que se acaba de crear, para que las",
+                  "   peticiones de modificar y eliminar lo usen. */",
+                  "pm.collectionVariables.set(\"voluntarioId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear voluntario sin nombre (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"381-5566778\",\n  \"habilidad\": \"Enfermeria\",\n  \"disponibilidad\": \"Turno tarde\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            },
+            "description": "El nombre es obligatorio."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear voluntario con estado invalido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Martina Rios\",\n  \"telefono\": \"381-5566778\",\n  \"habilidad\": \"Enfermeria\",\n  \"disponibilidad\": \"Turno tarde\",\n  \"estado\": \"ocupado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios"
+              ]
+            },
+            "description": "Los unicos valores validos son disponible, activo y en terreno."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar voluntario (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en terreno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios/{{voluntarioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios",
+                "{{voluntarioId}}"
+              ]
+            },
+            "description": "Modifica el registro creado mas arriba, no uno del seed."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar voluntario (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/voluntarios/{{voluntarioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "voluntarios",
+                "{{voluntarioId}}"
+              ]
+            },
+            "description": "Elimina el registro creado mas arriba, para que la base quede como estaba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 · Contacto",
+      "description": "Mensajes enviados desde el formulario de contacto del frontend.",
+      "item": [
+        {
+          "name": "Listar contacto (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer mensaje por id (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Traer mensaje inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto/999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto",
+                "999"
+              ]
+            },
+            "description": "El service lanza NotFoundException, que Nest convierte en 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear mensaje (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nadia Medina\",\n  \"email\": \"nadia.medina@geco.org\",\n  \"asunto\": \"Consulta por el refugio del centro\",\n  \"mensaje\": \"Queria saber si hay lugar disponible esta noche.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/contacto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            },
+            "description": "Guarda el id de la respuesta en la variable {{contactoId}}, que usan las dos ultimas peticiones."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "/* Guarda el id de lo que se acaba de crear, para que las",
+                  "   peticiones de modificar y eliminar lo usen. */",
+                  "pm.collectionVariables.set(\"contactoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear mensaje sin datos (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/contacto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            },
+            "description": "Cuerpo vacio: el DTO rechaza la peticion por los campos obligatorios."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Modificar mensaje (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asunto\": \"Consulta actualizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/contacto/{{contactoId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto",
+                "{{contactoId}}"
+              ]
+            },
+            "description": "Modifica el registro creado mas arriba, no uno del seed."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar mensaje (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacto/{{contactoId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "contacto",
+                "{{contactoId}}"
+              ]
+            },
+            "description": "Elimina el registro creado mas arriba, para que la base quede como estaba."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09 · Estadisticas",
+      "description": "Modulo de solo lectura. No tiene tabla propia: cuenta sobre las demas con Prisma y calcula el porcentaje de solicitudes atendidas.",
+      "item": [
+        {
+          "name": "Obtener estadisticas (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/estadisticas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "estadisticas"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Devuelve los cinco indicadores\", function () {",
+                  "  var d = pm.response.json();",
+                  "  [\"emergenciasActivas\", \"totalSolicitudes\", \"solicitudesAtendidas\",",
+                  "   \"voluntariosDisponibles\", \"porcentajeAtendidas\"].forEach(function (k) {",
+                  "    pm.expect(d).to.have.property(k);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "emergenciaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "solicitudId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refugioId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recursoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "voluntarioId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contactoId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
