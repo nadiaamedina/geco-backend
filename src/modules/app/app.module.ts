@@ -13,7 +13,7 @@ import { VoluntariosModule } from '../voluntarios/voluntarios.module';
 import { SolicitudesModule } from '../solicitudes/solicitudes.module';
 import { ContactoModule } from '../contacto/contacto.module';
 import { EstadisticasModule } from '../estadisticas/estadisticas.module';
-import { EventosGlobalesModule } from '../eventos-globales/eventos-globales.module';
+
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { EventosGlobalesModule } from '../eventos-globales/eventos-globales.modu
     SolicitudesModule,
     ContactoModule,
     EstadisticasModule,
-    EventosGlobalesModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],
